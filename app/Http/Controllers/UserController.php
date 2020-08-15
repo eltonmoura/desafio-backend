@@ -21,7 +21,10 @@ class UserController extends Controller
      *
      * @var array
      */
-    protected $withRelationships = [];
+    protected $withRelationships = [
+        'receipts',
+        'payments',
+    ];
 
     /**
      * Fields where the search will be made

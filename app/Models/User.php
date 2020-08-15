@@ -35,6 +35,38 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'password',
     ];
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'balance',
+    ];
+
+    public function receipts()
+    {
+        return $this->hasMany(Transaction::class, 'payee', 'id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Transaction::class, 'payer', 'id');
+    }
+
+    public function getBalanceAttribute()
+    {
+        $balance = 0;
+        foreach ($this->receipts as $transaction) {
+            $balance += $transaction->value;
+        }
+        foreach ($this->payments as $transaction) {
+
+            $balance -= $transaction->value;
+        }
+        return $balance;
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();

@@ -39,4 +39,5 @@ $router->group(['middleware' => 'auth:api'], function () use ($router, $fncResou
     });
 
     $fncResource('users', 'UserController');
+    $fncResource('transaction', 'TransactionController');
 });
