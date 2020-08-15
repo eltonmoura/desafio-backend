@@ -61,7 +61,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             $balance += $transaction->value;
         }
         foreach ($this->payments as $transaction) {
-
             $balance -= $transaction->value;
         }
         return $balance;
