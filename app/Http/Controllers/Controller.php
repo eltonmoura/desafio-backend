@@ -69,7 +69,7 @@ class Controller extends BaseController
             $obj = $this->beforeStore($request, $obj);
             $obj->save();
 
-            return response()->json($obj, Response::HTTP_CREATED);
+            return response()->json('OK', Response::HTTP_CREATED);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

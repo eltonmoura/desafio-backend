@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Transaction;
 
 class TransactionController extends Controller
@@ -26,4 +29,12 @@ class TransactionController extends Controller
      * @var array
      */
     protected $searchFields = [];
+
+    protected function beforeStore(Request $request, Model $obj) : Model
+    {
+        if (!$obj->isValid()) {
+            throw new \Exception('Invalid Transaction', Response::HTTP_BAD_REQUEST);
+        }
+        return $obj;
+    }
 }

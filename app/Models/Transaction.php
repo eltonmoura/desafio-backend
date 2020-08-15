@@ -17,13 +17,21 @@ class Transaction extends Model
         'payee',
     ];
 
-    public function payer()
+    public function userPayer()
     {
         return $this->belongsTo(User::class, 'payer');
     }
 
-    public function payee()
+    public function userPayee()
     {
         return $this->belongsTo(User::class, 'payee');
+    }
+
+    public function isValid()
+    {
+        if ($this->userPayer->type == User::TYPE_COMPANY) {
+            return false;
+        }
+        return true;
     }
 }

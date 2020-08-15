@@ -13,6 +13,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 {
     use Authenticatable, Authorizable;
 
+    const TYPE_PERSON = 'person';
+    const TYPE_COMPANY = 'company';
+
     /**
      * The attributes that are mass assignable.
      *
