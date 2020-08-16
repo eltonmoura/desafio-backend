@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\BadRequestException;
 
 class Controller extends BaseController
 {
@@ -43,17 +44,13 @@ class Controller extends BaseController
      */
     public function index(Request $request)
     {
-        try {
-            $queryBuilder = $this->model::query();
-            $queryBuilder = $this->defaultRelationships($queryBuilder);
-            $queryBuilder = $this->defaultSearch($request, $queryBuilder);
+        $queryBuilder = $this->model::query();
+        $queryBuilder = $this->defaultRelationships($queryBuilder);
+        $queryBuilder = $this->defaultSearch($request, $queryBuilder);
 
-            $result = $this->paginate($request, $queryBuilder);
+        $result = $this->paginate($request, $queryBuilder);
 
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return response()->json($result);
     }
 
     /**
@@ -64,15 +61,12 @@ class Controller extends BaseController
      */
     public function store(Request $request)
     {
-        try {
-            $obj = $this->model::create($request->all());
-            $obj = $this->beforeStore($request, $obj);
-            $obj->save();
+        $obj = new $this->model();
+        $obj->fill($request->all());
+        $obj = $this->beforeStore($request, $obj);
+        $obj->save();
 
-            return response()->json('OK', Response::HTTP_CREATED);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return response()->json('OK', Response::HTTP_CREATED);
     }
 
     /**
@@ -83,25 +77,21 @@ class Controller extends BaseController
      */
     public function show($id)
     {
-        try {
-            $queryBuilder = $this->model::query();
+        $queryBuilder = $this->model::query();
 
-            if (isset($this->withRelationships)) {
-                foreach ($this->withRelationships as $table) {
-                    $queryBuilder = $queryBuilder->with($table);
-                }
+        if (isset($this->withRelationships)) {
+            foreach ($this->withRelationships as $table) {
+                $queryBuilder = $queryBuilder->with($table);
             }
-
-            $obj = $queryBuilder->find($id);
-
-            if (!$obj) {
-                return response()->json(['error' => 'obj_not_found'], Response::HTTP_NOT_FOUND);
-            }
-
-            return response()->json($obj, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        $obj = $queryBuilder->find($id);
+
+        if (!$obj) {
+            throw new BadRequestException("Object not found");
+        }
+
+        return response()->json($obj, Response::HTTP_OK);
     }
 
     /**
@@ -113,20 +103,16 @@ class Controller extends BaseController
      */
     public function update(Request $request, $id)
     {
-        try {
-            $obj = $this->model::find($id);
-            if (!$obj) {
-                return response()->json(['error' => 'obj_not_found'], Response::HTTP_NOT_FOUND);
-            }
-
-            $obj->fill($request->all());
-            $obj = $this->beforeUpdate($request, $obj);
-            $obj->push();
-
-            return response()->json($obj, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        $obj = $this->model::find($id);
+        if (!$obj) {
+            throw new BadRequestException("Object not found");
         }
+
+        $obj->fill($request->all());
+        $obj = $this->beforeUpdate($request, $obj);
+        $obj->push();
+
+        return response()->json($obj, Response::HTTP_OK);
     }
 
     /**
@@ -137,17 +123,13 @@ class Controller extends BaseController
      */
     public function destroy(Request $request, $id)
     {
-        try {
-            $obj = $this->model::find($id);
-            if (!$obj) {
-                return response()->json(['error' => 'obj_not_found'], Response::HTTP_NOT_FOUND);
-            }
-            $obj = $this->beforeDestroy($request, $obj);
-            $obj->delete();
-            return response()->json(['ok']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        $obj = $this->model::find($id);
+        if (!$obj) {
+            throw new BadRequestException("Object not found");
         }
+        $obj = $this->beforeDestroy($request, $obj);
+        $obj->delete();
+        return response()->json(['ok']);
     }
 
     /**
@@ -189,7 +171,9 @@ class Controller extends BaseController
 
         if (!empty($search) && isset($this->searchFields)) {
             if (strlen($search) < self::MIN_SEARCH_LEN) {
-                throw new \Exception('Enter a search term greater than ' . self::MIN_SEARCH_LEN . ' characters');
+                throw new BadRequestException(
+                    'Enter a search term greater than ' . self::MIN_SEARCH_LEN . ' characters'
+                );
             }
             $queryBuilder = $queryBuilder->where(function ($query) use ($search) {
                 foreach ($this->searchFields as $field) {

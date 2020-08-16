@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -49,6 +51,11 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if (! $exception instanceof BadRequestException) {
+            Log::error($exception->getMessage() . '; REQUEST: ' . json_encode($request->toArray()));
+            return response()->json(['error' => 'internal_server_error'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
         return parent::render($request, $exception);
     }
 }

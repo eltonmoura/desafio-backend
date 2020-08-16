@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Transaction;
+use App\Models\User;
+use App\Exceptions\BadRequestException;
 
 class TransactionController extends Controller
 {
@@ -30,11 +31,21 @@ class TransactionController extends Controller
      */
     protected $searchFields = [];
 
-    protected function beforeStore(Request $request, Model $obj) : Model
+    /**
+     * Override Controller::store()
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function store(Request $request)
     {
-        if (!$obj->isValid()) {
-            throw new \Exception('Invalid Transaction', Response::HTTP_BAD_REQUEST);
+        $transaction = Transaction::create($request->all());
+
+        if ($transaction->userPayer->type == User::TYPE_COMPANY) {
+            throw new BadRequestException('Lojistas não podem enviar dinheiro');
         }
-        return $obj;
+
+        $transaction->save();
+        return response()->json('OK', Response::HTTP_CREATED);
     }
 }

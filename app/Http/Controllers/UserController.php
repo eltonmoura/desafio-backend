@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Exceptions\BadRequestException;
 
 class UserController extends Controller
 {
@@ -38,6 +39,14 @@ class UserController extends Controller
 
     protected function beforeStore(Request $request, Model $obj) : Model
     {
+        if (! User::where('identity', $obj->identity)->get()->isEmpty()) {
+            throw new BadRequestException('Já existe um usuário com este documento cadastrado');
+        }
+
+        if (! User::where('email', $obj->email)->get()->isEmpty()) {
+            throw new BadRequestException('Já existe um usuário com este e-mail cadastrado');
+        }
+
         return $this->encryptPassord($request, $obj);
     }
 
