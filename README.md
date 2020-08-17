@@ -22,4 +22,9 @@ http://localhost:8080/users
 Todos recursos disponíveis da API podem ser encontrados no routes/web.php.
 
 Mais exemplos de rotas na collection do [Postman](https://www.getpostman.com)
-Importe de [postman-collection.json](docs/postman-collection.json)
+Importe de [postman-collection.json](https://github.com/eltonmoura/desafio-backend/tree/master/docs/postman-collection.json)
+
+## Executando Testes Unitários
+```
+docker-compose exec web ./vendor/bin/phpunit
+```
