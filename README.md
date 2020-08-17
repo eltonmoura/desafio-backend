@@ -21,5 +21,5 @@ http://localhost:8080/users
 ```
 Todos recursos disponíveis da API podem ser encontrados no routes/web.php.
 
-Mais exemplos de rotas na collection do [Postman] (https://www.getpostman.com)
-Importe de [postman-collection.json](./docs/postman-collection.json)
+Mais exemplos de rotas na collection do [Postman](https://www.getpostman.com)
+Importe de [postman-collection.json](docs/postman-collection.json)
