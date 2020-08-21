@@ -25,7 +25,7 @@ class TransactionTest extends TestCase
 
         $this->json('POST', '/transaction', $body)
             ->seeStatusCode(Response::HTTP_CREATED)
-            ->seeJson(['OK']);
+            ->seeJson(['ok']);
     }
 
     public function testShouldNotTransferByCompany()
