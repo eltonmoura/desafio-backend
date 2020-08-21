@@ -40,6 +40,8 @@ class TransactionRepository extends AbstractRepository implements TransactionRep
 
         $this->emailService->sendConfimation($transaction);
 
+        // die("aqui: " . $transaction->id);
+
         DB::commit();
         return $transaction;
     }
