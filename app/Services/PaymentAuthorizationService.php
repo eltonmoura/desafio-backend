@@ -2,8 +2,9 @@
 namespace App\Services;
 
 use GuzzleHttp\Client as HttpClient;
+use App\Services\Contracts\PaymentAuthorizationServiceInterface;
 
-class PaymentAuthorizationService
+class PaymentAuthorizationService implements PaymentAuthorizationServiceInterface
 {
     protected $httpClient;
 

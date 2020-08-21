@@ -3,8 +3,9 @@ namespace App\Services;
 
 use GuzzleHttp\Client as HttpClient;
 use App\Models\Transaction;
+use App\Services\Contracts\EmailServiceInterface;
 
-class EmailService
+class EmailService implements EmailServiceInterface
 {
     protected $httpClient;
 

@@ -3,8 +3,11 @@
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use Illuminate\Http\Response;
-
+use App\Repositories\TransactionRepository;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Services\Contracts\EmailServiceInterface;
+use App\Services\Contracts\PaymentAuthorizationServiceInterface;
 
 class TransactionTest extends TestCase
 {
@@ -66,5 +69,33 @@ class TransactionTest extends TestCase
         $this->post('/transaction', $body)
             ->seeStatusCode(Response::HTTP_BAD_REQUEST)
             ->seeJson(['error' => 'Lojistas não podem fazer tranferências']);
+    }
+
+    public function testPaymentAuthorizationServiceReponse()
+    {
+        $model = new Transaction();
+        $paymentAuthorizationService = $this->getMockBuilder(PaymentAuthorizationServiceInterface::class)->getMock();
+        $emailService = $this->getMockBuilder(EmailServiceInterface::class)->getMock();
+
+        // denied
+        $paymentAuthorizationService->method('verify')->willReturn(false);
+
+        $transactionRepository = new TransactionRepository(
+            $model,
+            $paymentAuthorizationService,
+            $emailService
+        );
+
+        $body = [
+            'value' => 10.00,
+            'payer' => 2,
+            'payee' => 4,
+        ];
+
+        try {
+            $return = $transactionRepository->create($body);
+        } catch (Exception $e) {
+            $this->assertEquals('Transação não autorizada', $e->getMessage());
+        }
     }
 }

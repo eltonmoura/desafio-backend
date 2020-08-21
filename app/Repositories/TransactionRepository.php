@@ -7,8 +7,8 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\BadRequestException;
-use App\Services\PaymentAuthorizationService;
-use App\Services\EmailService;
+use App\Services\Contracts\PaymentAuthorizationServiceInterface;
+use App\Services\Contracts\EmailServiceInterface;
 
 class TransactionRepository extends AbstractRepository implements TransactionRepositoryInterface
 {
@@ -16,8 +16,8 @@ class TransactionRepository extends AbstractRepository implements TransactionRep
 
     public function __construct(
         Transaction $model,
-        PaymentAuthorizationService $paymentAuthorizationService,
-        EmailService $emailService
+        PaymentAuthorizationServiceInterface $paymentAuthorizationService,
+        EmailServiceInterface $emailService
     ) {
         $this->model = $model;
         $this->paymentAuthorizationService = $paymentAuthorizationService;
@@ -39,8 +39,6 @@ class TransactionRepository extends AbstractRepository implements TransactionRep
         }
 
         $this->emailService->sendConfimation($transaction);
-
-        // die("aqui: " . $transaction->id);
 
         DB::commit();
         return $transaction;
