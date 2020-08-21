@@ -22,6 +22,6 @@ class UserTest extends TestCase
     {
         $response =  $this->call('GET', '/users');
         $this->assertEquals(Response::HTTP_OK, $response->status());
-        $this->seeJsonStructure(['count', 'total', 'results']);
+        $this->assertIsArray(json_decode($response->getContent(), true));
     }
 }

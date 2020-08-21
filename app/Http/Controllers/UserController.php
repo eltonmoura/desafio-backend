@@ -3,63 +3,38 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Exceptions\BadRequestException;
+use Illuminate\Http\Response;
+
+use App\Repositories\Contracts\UserRepositoryInterface;
 
 class UserController extends Controller
 {
-    /**
-     * The Model class associated with this Controller.
-     *
-     * @var string
-     */
-    protected $model = User::class;
-
-    /**
-     * Get relationships when return objects
-     *
-     * @var array
-     */
-    protected $withRelationships = [
-        'receipts',
-        'payments',
-    ];
-
-    /**
-     * Fields where the search will be made
-     *
-     * @var array
-     */
-    protected $searchFields = [
-        'email',
-        'name',
-    ];
-
-    protected function beforeStore(Request $request, Model $obj) : Model
+    public function __construct(UserRepositoryInterface $userRepository)
     {
-        if (! User::where('identity', $obj->identity)->get()->isEmpty()) {
-            throw new BadRequestException('Já existe um usuário com este documento cadastrado');
-        }
-
-        if (! User::where('email', $obj->email)->get()->isEmpty()) {
-            throw new BadRequestException('Já existe um usuário com este e-mail cadastrado');
-        }
-
-        return $this->encryptPassord($request, $obj);
+        $this->userRepository = $userRepository;
     }
 
-    protected function beforeUpdate(Request $request, Model $obj) : Model
+    /**
+     * Store a newly User resource in storage.
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function store(Request $request)
     {
-        return $this->encryptPassord($request, $obj);
+        $this->userRepository->create($request->all());
+        return response()->json('OK', Response::HTTP_CREATED);
     }
 
-    private function encryptPassord(Request $request, Model $obj) : Model
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function index(Request $request)
     {
-        if (!empty($request->input('password'))) {
-            $obj->password = Hash::make($request->input('password'));
-        }
-        return $obj;
+        $result = $this->userRepository->findAll();
+        return response()->json($result);
     }
 }
