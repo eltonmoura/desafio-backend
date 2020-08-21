@@ -15,6 +15,33 @@ class TransactionTest extends TestCase
         $this->actingAs($user);
     }
 
+    public function testCreateValidate()
+    {
+        $this->json('POST', '/transaction', ['payer' => 2, 'payee' => 4])
+            ->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson(['value' => ['The value field is required.']]);
+
+        $this->json('POST', '/transaction', ['value' => 'AAAA', 'payer' => 2, 'payee' => 4])
+            ->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson(['value' => ['The value must be a number.']]);
+
+        $this->json('POST', '/transaction', ['value' => 10.00, 'payee' => 4])
+            ->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson(['payer' => ['The payer field is required.']]);
+
+        $this->json('POST', '/transaction', ['value' => 10.00, 'payer' => 'aaa', 'payee' => 4])
+            ->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson(['payer' => ['The payer must be an integer.']]);
+
+        $this->json('POST', '/transaction', ['value' => 10.00, 'payer' => 4])
+            ->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson(['payee' => ['The payee field is required.']]);
+
+        $this->json('POST', '/transaction', ['value' => 10.00, 'payer' => 2, 'payee' => 'aaa'])
+            ->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson(['payee' => ['The payee must be an integer.']]);
+    }
+
     public function testShouldTransferBetweenUsers()
     {
         $body = [
